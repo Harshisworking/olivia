@@ -40,14 +40,63 @@ A specialized OOP-based manager handles the "Network Bridging" logic.
 Configurations are mounted from the host (`~/nginx-gateway/conf.d`) into containers, allowing for persistent settings and easy debugging directly from the Ubuntu terminal.
 
 ---
-
 ## 🛠 Quick Start (Infrastructure)
 
-To spin up the core Olivia infrastructure:
+Before starting the containers, ensure the host environment is prepared. 
+
+### 1. Prepare Host Directory & Initial Config
+This ensures Nginx has a valid configuration to load on its first boot.
 
 ```bash
-# 1. Start the Master Gateway
-docker run -d --name master-nginx --network web-gateway -p 80:80 -v ~/nginx-gateway/conf.d:/etc/nginx/conf.d nginx:alpine
+# Create the directory structure
+mkdir -p ~/nginx-gateway/conf.d
 
-# 2. Start the Central Adminer
-docker run -d --name master-adminer --network web-gateway -p 8080:8080 adminer
+# Create a basic entry-point config
+cat <<EOF > ~/nginx-gateway/conf.d/default.conf
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        return 200 'Olivia Gateway is Running';
+        add_header Content-Type text/plain;
+    }
+
+    # Centralized Database Manager (Adminer)
+    location /db-manager/ {
+        proxy_pass http://master-adminer:8080/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF
+```
+### 2. Create the Shared Network
+
+Containers must share a network to communicate by name (e.g., Nginx finding Adminer).
+
+```bash
+docker network create web-gateway
+```
+
+### 3. Spin up the Core Infrastructure
+
+Now run the containers. The `-v` flag links your host configuration to the Nginx instance.
+
+```bash
+# Start the Master Gateway
+docker run -d \
+  --name master-nginx \
+  --network web-gateway \
+  -p 80:80 \
+  -v ~/nginx-gateway/conf.d:/etc/nginx/conf.d \
+  --restart always \
+  nginx:alpine
+
+# Start the Central Adminer
+docker run -d \
+  --name master-adminer \
+  --network web-gateway \
+  --restart always \
+  adminer
+```
