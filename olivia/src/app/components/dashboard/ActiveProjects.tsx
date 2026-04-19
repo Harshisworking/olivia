@@ -1,6 +1,11 @@
+"use client"
 import { Layers, Box } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function ActiveProjects() {
+    const { data: data, status } = useSession()
+    const []
+
     return (
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <h3 className="text-sm font-bold tracking-wider text-white mb-6">ACTIVE PROJECTS <span className="text-zinc-500 font-normal">(Showing 2 of 8)</span></h3>
