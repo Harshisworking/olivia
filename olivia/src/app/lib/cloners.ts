@@ -18,6 +18,8 @@ export class GitCloner {
             console.log(`[GitCloner] Cloning ${repoUrl} into ${projectPath}...`);
             await execFileAsync("git", ["clone", "--depth", "1", repoUrl, projectPath]);
 
+            console.log("clone completed successfully");
+
             return projectPath;
         } catch (error) {
             console.error(`[GitCloner] Failed to clone ${repoUrl}:`, error);

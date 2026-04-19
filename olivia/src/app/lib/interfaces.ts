@@ -3,5 +3,5 @@ export interface coloneStrategy {
 }
 
 export interface buildStrategy {
-    build(url: string, hasEnv: boolean, projectEnvs: Record<string, string>, requirments: string[]): Promise<void>;
+    build(url: string, hasEnv: boolean, projectEnvs: Record<string, Record<string, string>>, requirments: string[], forceBuild: boolean, autoDockerizationReq: boolean): Promise<void>;
 }
